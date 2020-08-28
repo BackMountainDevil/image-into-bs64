@@ -2,6 +2,8 @@ from PIL import Image
 import os
 import base64
 
+aimsize= 130
+
 # 获取文件大小:KB
 def get_size(file):
     size = os.path.getsize(file)
@@ -23,7 +25,7 @@ def get_outfile(infile, outfile):
     :param quality: 初始压缩比率
     :return: 压缩文件地址，压缩文件大小
     """
-def compress_image(infile, outfile='', mb=130, step=10, quality=80):
+def compress_image(infile, outfile='', mb=aimsize , step=10, quality=80):
     o_size = get_size(infile)
     if o_size <= mb:
         return infile
@@ -38,20 +40,28 @@ def compress_image(infile, outfile='', mb=130, step=10, quality=80):
     return outfile, get_size(outfile)
 
 def img_bs64(infile,outfile='', savefile =''):
-    compress_image(infile)
-    outfile = get_outfile(infile, outfile)
-    f=open(outfile,'rb')
-    pbs64=base64.b64encode(f.read()) 
-    f.close()
-    dir, suffix = os.path.splitext(infile)
-    savefile = '{}-out{}'.format(dir, '.txt')
+    size =os.path.getsize(infile)/1024
+    if size > aimsize :
+        compress_image(infile)
+        outfile = get_outfile(infile, outfile)
+        f=open(outfile,'rb')
+        pbs64=base64.b64encode(f.read()) 
+        f.close()
+        dir, suffix = os.path.splitext(infile)
+        savefile = '{}-out{}'.format(dir, '.txt')
+        os.remove(outfile)
+    else:
+        f=open(infile,'rb')
+        pbs64=base64.b64encode(f.read()) 
+        f.close()
+        dir, suffix = os.path.splitext(infile)
+        savefile = '{}-out{}'.format(dir, '.txt')
     mf=open(savefile,"wb")
     mf.write(pbs64)
     mf.close
-    os.remove(outfile)
     #print(pbs64) #This will make python shell stuck, so put it in a txt file
     
     
 if __name__ == '__main__':
-    picturepath= "luffy.jpg" 
+    picturepath= "12.jpg"
     img_bs64(picturepath)
